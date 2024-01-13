@@ -6,7 +6,7 @@ DEFAULT_ANVIL_KEY := 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf
 
 help:
 	@echo "Usage:"
-	@echo "  make deploy [ARGS=...]\n    example: make deploy ARGS=\"--network sepolia\""
+	@echo "  make deploy [ARGS=...]\n    example: make deploy ARGS=\"--network sepolia --gas-price\""
 	@echo ""
 	@echo "  make fund [ARGS=...]\n    example: make deploy ARGS=\"--network sepolia\""
 
@@ -35,15 +35,17 @@ anvil :; anvil -m 'test test test test test test test test test test test junk' 
 
 NETWORK_ARGS := --rpc-url http://localhost:8545 --private-key $(DEFAULT_ANVIL_KEY) --broadcast
 
+GAS_PRICE_ARG := $(word 2, $(filter --gas-price%, $(ARGS)))
+
 ifeq ($(findstring --network sepolia,$(ARGS)),--network sepolia)
-	NETWORK_ARGS := --rpc-url $(SEPOLIA_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(ETHERSCAN_API_KEY) -vvvv
+	NETWORK_ARGS := --rpc-url $(SEPOLIA_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(ETHERSCAN_API_KEY) $(GAS_PRICE_ARG) -vvvv
 endif
 
 deploy:
-	@forge script script/DeployFundMe.s.sol:DeployFundMe $(NETWORK_ARGS)
+	@forge script script/DeployFundMe.s.sol:DeployFundMe $(NETWORK_ARGS)  $(GAS_PRICE_ARG)
 
 fund:
-	@forge script script/Interactions.s.sol:FundFundMe $(NETWORK_ARGS)
+	@forge script script/Interactions.s.sol:FundFundMe $(NETWORK_ARGS) $(GAS_PRICE_ARG)
 
 withdraw:
-	@forge script script/Interactions.s.sol:WithdrawFundMe $(NETWORK_ARGS) 
+	@forge script script/Interactions.s.sol:WithdrawFundMe $(NETWORK_ARGS) $(GAS_PRICE_ARG) 
